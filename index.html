@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDNetWORK-Pay — Recovery System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+<style>
+:root{
+  --bg:#05070f;--s1:#0c0f1d;--s2:#111528;
+  --glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --cyan:#00ffe7;--blue:#4d8fff;--purple:#b06dff;--pink:#ff6db0;
+  --green:#00e5a0;--yellow:#ffd166;--red:#ff5e7a;
+  --text:#f0f4ff;--muted:#5a6585;--muted2:#8895b3;
+  --display:'Syne',sans-serif;--body:'DM Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:float 12s ease-in-out infinite;}
+.orb1{width:500px;height:500px;background:rgba(0,255,231,.07);top:-150px;left:-100px;animation-delay:0s;}
+.orb2{width:400px;height:400px;background:rgba(77,143,255,.08);top:30%;right:-120px;animation-delay:-4s;}
+.orb3{width:350px;height:350px;background:rgba(176,109,255,.07);bottom:5%;left:20%;animation-delay:-8s;}
+.orb4{width:250px;height:250px;background:rgba(255,109,176,.05);top:60%;left:60%;animation-delay:-2s;}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-40px) scale(1.05);}66%{transform:translate(-20px,30px) scale(0.97);}}
+.bg-fx::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px;}
+.wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:28px 24px;}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;animation:slideDown .6s ease both;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:none;}}
+.brand{display:flex;align-items:center;gap:16px;}
+.brand-mark{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 30px rgba(0,255,231,.35),0 0 60px rgba(0,255,231,.12);position:relative;}
+.brand-mark::after{content:'';position:absolute;inset:-1px;border-radius:17px;background:linear-gradient(135deg,var(--cyan),var(--blue));z-index:-1;filter:blur(10px);opacity:.5;}
+.brand-name{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-0.5px;}
+.brand-name span{background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-sub{font-size:12px;color:var(--muted2);margin-top:2px;font-weight:400;}
+.hdr-right{text-align:right;}
+.hdr-date{font-size:12px;color:var(--muted2);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
+.hdr-time{font-family:var(--display);font-size:22px;font-weight:700;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:3px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:22px 20px;position:relative;overflow:hidden;backdrop-filter:blur(20px);transition:transform .25s,border-color .25s,box-shadow .25s;animation:fadeUp .5s ease both;}
+.stat-card:nth-child(1){animation-delay:.05s;}.stat-card:nth-child(2){animation-delay:.1s;}.stat-card:nth-child(3){animation-delay:.15s;}.stat-card:nth-child(4){animation-delay:.2s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+.stat-card:hover{transform:translateY(-5px);border-color:var(--border2);box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.stat-glow{position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;filter:blur(40px);opacity:.5;}
+.sc-cyan .stat-glow{background:var(--cyan);}.sc-green .stat-glow{background:var(--green);}.sc-red .stat-glow{background:var(--red);}.sc-purple .stat-glow{background:var(--purple);}
+.stat-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:14px;}
+.sc-cyan .stat-icon{background:rgba(0,255,231,.12);color:var(--cyan);}.sc-green .stat-icon{background:rgba(0,229,160,.12);color:var(--green);}.sc-red .stat-icon{background:rgba(255,94,122,.12);color:var(--red);}.sc-purple .stat-icon{background:rgba(176,109,255,.12);color:var(--purple);}
+.stat-label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;}
+.stat-value{font-family:var(--display);font-size:28px;font-weight:800;margin:6px 0 3px;line-height:1;}
+.sc-cyan .stat-value{color:var(--cyan);text-shadow:0 0 20px rgba(0,255,231,.4);}.sc-green .stat-value{color:var(--green);text-shadow:0 0 20px rgba(0,229,160,.4);}.sc-red .stat-value{color:var(--red);text-shadow:0 0 20px rgba(255,94,122,.4);}.sc-purple .stat-value{color:var(--purple);text-shadow:0 0 20px rgba(176,109,255,.4);}
+.stat-meta{font-size:11px;color:var(--muted);font-weight:500;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:26px;backdrop-filter:blur(24px);transition:border-color .25s;animation:fadeUp .5s ease both;}
+.panel:hover{border-color:var(--border2);}.panel:nth-child(2){animation-delay:.1s;}
+.panel-title{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:22px;display:flex;align-items:center;gap:10px;}
+.ptag{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-size:14px;background:linear-gradient(135deg,rgba(0,255,231,.15),rgba(77,143,255,.15));border:1px solid rgba(0,255,231,.2);}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;color:var(--muted2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.fg input,.fg select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:11px 16px;color:var(--text);font-family:var(--body);font-size:13px;font-weight:400;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+.fg input::placeholder{color:var(--muted);}
+.fg input:focus,.fg select:focus{border-color:rgba(0,255,231,.5);background:rgba(0,255,231,.04);box-shadow:0 0 0 3px rgba(0,255,231,.08),0 0 20px rgba(0,255,231,.05);}
+.fg select option{background:#111528;color:var(--text);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn{width:100%;padding:13px;border:none;border-radius:13px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:all .2s;margin-top:6px;position:relative;overflow:hidden;}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:.2s;}
+.btn:hover::before{background:rgba(255,255,255,.08);}
+.btn:active{transform:scale(.98);}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#05070f;box-shadow:0 4px 20px rgba(0,255,231,.25),0 1px 0 rgba(255,255,255,.2) inset;}
+.btn-cyan:hover{box-shadow:0 8px 35px rgba(0,255,231,.4),0 1px 0 rgba(255,255,255,.2) inset;transform:translateY(-2px);}
+.btn-green{background:linear-gradient(135deg,var(--green),#00b37a);color:#05070f;box-shadow:0 4px 20px rgba(0,229,160,.25),0 1px 0 rgba(255,255,255,.2) inset;}
+.btn-green:hover{box-shadow:0 8px 35px rgba(0,229,160,.4),0 1px 0 rgba(255,255,255,.2) inset;transform:translateY(-2px);}
+.chart-panel{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:28px;backdrop-filter:blur(24px);margin-bottom:24px;animation:fadeUp .5s .25s ease both;}
+.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.chart-title{font-family:var(--display);font-size:17px;font-weight:700;}
+.chart-title span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.yr-pills{display:flex;gap:8px;flex-wrap:wrap;}
+.yr-pill{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:30px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s;font-family:var(--display);}
+.yr-pill.active,.yr-pill:hover{background:rgba(0,255,231,.12);border-color:rgba(0,255,231,.4);color:var(--cyan);box-shadow:0 0 15px rgba(0,255,231,.15);}
+.tbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto;}
+.tbl-wrap::-webkit-scrollbar{width:4px;height:4px;}
+.tbl-wrap::-webkit-scrollbar-track{background:transparent;}
+.tbl-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead{position:sticky;top:0;z-index:5;backdrop-filter:blur(20px);}
+thead tr{background:rgba(5,7,15,.7);}
+th{padding:11px 14px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+tbody tr:hover{background:rgba(0,255,231,.03);}
+td{padding:11px 14px;color:var(--text);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:30px;font-size:10px;font-weight:600;letter-spacing:.3px;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.b-paid{background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.25);}
+.b-pending{background:rgba(255,209,102,.1);color:var(--yellow);border:1px solid rgba(255,209,102,.25);}
+.b-overdue{background:rgba(255,94,122,.1);color:var(--red);border:1px solid rgba(255,94,122,.25);}
+.cname{font-weight:600;color:var(--text);}
+.camount{font-family:var(--display);font-weight:700;color:var(--green);}
+.del-btn{background:rgba(255,94,122,.08);border:1px solid rgba(255,94,122,.2);color:var(--red);padding:4px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;transition:all .2s;font-family:var(--body);}
+.del-btn:hover{background:rgba(255,94,122,.2);box-shadow:0 0 12px rgba(255,94,122,.2);}
+.empty-row td{text-align:center;color:var(--muted);padding:36px;font-size:13px;}
+.empty-row td span{display:block;font-size:28px;margin-bottom:8px;}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.toast{position:fixed;bottom:32px;right:32px;background:rgba(12,15,29,.95);border:1px solid rgba(0,255,231,.3);color:var(--text);padding:14px 22px;border-radius:16px;font-size:13px;font-weight:600;font-family:var(--body);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 30px rgba(0,255,231,.1);transform:translateY(80px) scale(.95);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:9999;backdrop-filter:blur(20px);max-width:320px;}
+.toast.show{transform:translateY(0) scale(1);opacity:1;}
+.toast.err{border-color:rgba(255,94,122,.4);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 30px rgba(255,94,122,.1);}
+.loading-overlay{position:fixed;inset:0;background:rgba(5,7,15,.8);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);}
+.loading-overlay.hidden{display:none;}
+.loader{width:48px;height:48px;border:3px solid rgba(0,255,231,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}}
+@media(max-width:540px){header{flex-direction:column;gap:14px;text-align:center;}.stats{grid-template-columns:1fr 1fr;}.wrap{padding:18px 16px;}}
+</style>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+</div>
+
+<div class="bg-fx">
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="orb orb3"></div><div class="orb orb4"></div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🌐</div>
+      <div>
+        <div class="brand-name">hdNetwork<span>Pay</span></div>
+        <div class="brand-sub"><span class="sync-dot"></span>Internet Recovery &amp; Payment System</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-date" id="hdrDate">—</div>
+      <div class="hdr-time" id="hdrTime">—</div>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card sc-cyan"><div class="stat-glow"></div><div class="stat-icon">👥</div><div class="stat-label">Total Customers</div><div class="stat-value" id="stCust">0</div><div class="stat-meta">Registered users</div></div>
+    <div class="stat-card sc-green"><div class="stat-glow"></div><div class="stat-icon">💵</div><div class="stat-label">Total Collected</div><div class="stat-value" id="stCollected">Rs 0</div><div class="stat-meta">All paid payments</div></div>
+    <div class="stat-card sc-red"><div class="stat-glow"></div><div class="stat-icon">⏳</div><div class="stat-label">Pending Amount</div><div class="stat-value" id="stPending">Rs 0</div><div class="stat-meta">Awaiting payment</div></div>
+    <div class="stat-card sc-purple"><div class="stat-glow"></div><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value" id="stMonth">Rs 0</div><div class="stat-meta">Current month paid</div></div>
+  </div>
+
+  <div class="section-label">Management</div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-title"><span class="ptag">👤</span> Add New Customer</div>
+      <div class="fg"><label>Full Name *</label><input type="text" id="custName" placeholder="e.g. Ahmed Khan"></div>
+      <div class="fg"><label>Phone Number</label><input type="text" id="custPhone" placeholder="e.g. 0300-1234567"></div>
+      <div class="fg"><label>Area / Address</label><input type="text" id="custArea" placeholder="e.g. Block B, Gulshan"></div>
+      <div class="row2">
+        <div class="fg"><label>Package Rs/month</label><input type="number" id="custPackage" placeholder="1500"></div>
+        <div class="fg"><label>Join Date</label><input type="date" id="custDate"></div>
+      </div>
+      <button class="btn btn-cyan" id="addCustBtn">+ Add Customer</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="ptag">💰</span> Record Payment</div>
+      <div class="fg"><label>Select Customer *</label><select id="payCustomer"><option value="">— Choose Customer —</option></select></div>
+      <div class="row2">
+        <div class="fg"><label>Amount (Rs) *</label><input type="number" id="payAmount" placeholder="1500"></div>
+        <div class="fg"><label>Payment Date *</label><input type="date" id="payDate"></div>
+      </div>
+      <div class="row2">
+        <div class="fg">
+          <label>Month</label>
+          <select id="payMonth">
+            <option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Status</label>
+          <select id="payStatus">
+            <option value="paid">✅ Paid</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="overdue">❌ Overdue</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Note (optional)</label><input type="text" id="payNote" placeholder="e.g. Cash, advance, partial..."></div>
+      <button class="btn btn-green" id="addPayBtn">✓ Record Payment</button>
+    </div>
+  </div>
+
+  <div class="section-label">Analytics</div>
+  <div class="chart-panel">
+    <div class="chart-hdr">
+      <div class="chart-title">📊 <span>Yearly Payment Overview</span></div>
+      <div class="yr-pills" id="yrPills"></div>
+    </div>
+    <canvas id="payChart" height="75"></canvas>
+  </div>
+
+  <div class="section-label">Records</div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-title"><span class="ptag">👥</span> Customer List</div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Area</th><th>Package</th><th></th></tr></thead><tbody id="custTable"></tbody></table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="ptag">📋</span> Payment History</div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>#</th><th>Customer</th><th>Amount</th><th>Month</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="payTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  SUPABASE CONFIG
+// ═══════════════════════════════════════════════
+var SUPA_URL = 'https://febnstuhwyezhvywkayx.supabase.co';
+var SUPA_KEY = 'sb_publishable_uGRofPCguDd-rGfsJBAbhw_uJIHD1Pq';
+
+function sbFetch(path, options) {
+  var url = SUPA_URL + '/rest/v1/' + path;
+  var headers = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+  if (options && options.headers) {
+    Object.assign(headers, options.headers);
+  }
+  return fetch(url, Object.assign({}, options, { headers: headers }));
+}
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+var customers = [];
+var payments  = [];
+
+// ═══════════════════════════════════════════════
+//  LOADING
+// ═══════════════════════════════════════════════
+function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+function tickClock() {
+  var now = new Date();
+  document.getElementById('hdrDate').textContent =
+    now.toLocaleDateString('en-PK', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('hdrTime').textContent =
+    now.toLocaleTimeString('en-PK', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ═══════════════════════════════════════════════
+//  DEFAULT DATES
+// ═══════════════════════════════════════════════
+(function() {
+  var iso = new Date().toISOString().split('T')[0];
+  document.getElementById('custDate').value = iso;
+  document.getElementById('payDate').value  = iso;
+  document.getElementById('payMonth').value = new Date().getMonth() + 1;
+})();
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg, err) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  setTimeout(function() { t.className = 'toast'; }, 3200);
+}
+
+// ═══════════════════════════════════════════════
+//  FETCH DATA FROM SUPABASE
+// ═══════════════════════════════════════════════
+function fetchAll() {
+  showLoading();
+  return Promise.all([
+    sbFetch('customers?order=created_at.asc').then(function(r) { return r.json(); }),
+    sbFetch('payments?order=created_at.desc').then(function(r) { return r.json(); })
+  ]).then(function(results) {
+    customers = Array.isArray(results[0]) ? results[0] : [];
+    payments  = Array.isArray(results[1]) ? results[1] : [];
+    hideLoading();
+    renderAll();
+  }).catch(function(err) {
+    hideLoading();
+    showToast('⚠️ Connection error! Check internet.', true);
+    console.error(err);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  ADD CUSTOMER
+// ═══════════════════════════════════════════════
+function addCustomer() {
+  var name    = document.getElementById('custName').value.trim();
+  var phone   = document.getElementById('custPhone').value.trim();
+  var area    = document.getElementById('custArea').value.trim();
+  var pkgVal  = document.getElementById('custPackage').value.trim();
+  var date    = document.getElementById('custDate').value;
+
+  if (!name) { showToast('⚠️  Customer name is required!', true); return; }
+
+  var btn = document.getElementById('addCustBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  var data = {
+    id: Date.now().toString(),
+    name: name,
+    phone: phone || '',
+    area: area || '',
+    package: pkgVal ? +pkgVal : 0,
+    join_date: date,
+    created_at: new Date().toISOString()
+  };
+
+  sbFetch('customers', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(JSON.stringify(e)); });
+    document.getElementById('custName').value    = '';
+    document.getElementById('custPhone').value   = '';
+    document.getElementById('custArea').value    = '';
+    document.getElementById('custPackage').value = '';
+    showToast('✅  "' + name + '" added successfully!');
+    return fetchAll();
+  }).catch(function(err) {
+    showToast('❌ Error saving customer!', true);
+    console.error(err);
+  }).finally(function() {
+    btn.disabled = false;
+    btn.textContent = '+ Add Customer';
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  ADD PAYMENT
+// ═══════════════════════════════════════════════
+function addPayment() {
+  var custId = document.getElementById('payCustomer').value;
+  var amount = document.getElementById('payAmount').value.trim();
+  var date   = document.getElementById('payDate').value;
+  var month  = +document.getElementById('payMonth').value;
+  var status = document.getElementById('payStatus').value;
+  var note   = document.getElementById('payNote').value.trim();
+
+  if (!custId) { showToast('⚠️  Please select a customer!', true); return; }
+  if (!amount || isNaN(amount) || +amount <= 0) { showToast('⚠️  Enter a valid amount!', true); return; }
+  if (!date)   { showToast('⚠️  Please select a date!', true); return; }
+
+  var cust = customers.find(function(c) { return c.id === custId; });
+
+  var btn = document.getElementById('addPayBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  var data = {
+    id: Date.now().toString(),
+    customer_id: custId,
+    customer_name: cust ? cust.name : 'Unknown',
+    amount: +amount,
+    date: date,
+    month: month,
+    year: new Date(date).getFullYear(),
+    status: status,
+    note: note || '',
+    created_at: new Date().toISOString()
+  };
+
+  sbFetch('payments', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(JSON.stringify(e)); });
+    document.getElementById('payAmount').value = '';
+    document.getElementById('payNote').value   = '';
+    showToast('💰  Rs ' + Number(amount).toLocaleString() + ' recorded!');
+    return fetchAll();
+  }).catch(function(err) {
+    showToast('❌ Error saving payment!', true);
+    console.error(err);
+  }).finally(function() {
+    btn.disabled = false;
+    btn.textContent = '✓ Record Payment';
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  DELETE
+// ═══════════════════════════════════════════════
+function delCustomer(id) {
+  if (!confirm('Delete customer and all their payments?')) return;
+  showLoading();
+  Promise.all([
+    sbFetch('customers?id=eq.' + id, { method: 'DELETE' }),
+    sbFetch('payments?customer_id=eq.' + id, { method: 'DELETE' })
+  ]).then(function() {
+    showToast('🗑️  Customer removed.');
+    return fetchAll();
+  }).catch(function(err) {
+    hideLoading();
+    showToast('❌ Error deleting!', true);
+    console.error(err);
+  });
+}
+
+function delPayment(id) {
+  if (!confirm('Delete this payment?')) return;
+  showLoading();
+  sbFetch('payments?id=eq.' + id, { method: 'DELETE' }).then(function() {
+    showToast('🗑️  Payment removed.');
+    return fetchAll();
+  }).catch(function(err) {
+    hideLoading();
+    showToast('❌ Error deleting!', true);
+    console.error(err);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  MONTH NAMES
+// ═══════════════════════════════════════════════
+var MN = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ═══════════════════════════════════════════════
+//  RENDER CUSTOMER TABLE
+// ═══════════════════════════════════════════════
+function renderCustTable() {
+  var tb = document.getElementById('custTable');
+  if (!customers.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="6"><span>👤</span>No customers yet — add one above</td></tr>';
+    return;
+  }
+  tb.innerHTML = customers.map(function(c, i) {
+    return '<tr>' +
+      '<td style="color:var(--muted);font-size:11px">' + (i+1) + '</td>' +
+      '<td class="cname">' + c.name + '</td>' +
+      '<td style="color:var(--muted2)">' + (c.phone || '—') + '</td>' +
+      '<td style="color:var(--muted2)">' + (c.area  || '—') + '</td>' +
+      '<td class="camount">Rs ' + (c.package || 0).toLocaleString() + '</td>' +
+      '<td><button class="del-btn" onclick="delCustomer(\'' + c.id + '\')">Remove</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER PAYMENT TABLE
+// ═══════════════════════════════════════════════
+function renderPayTable() {
+  var tb = document.getElementById('payTable');
+  if (!payments.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7"><span>💳</span>No payments yet — record one above</td></tr>';
+    return;
+  }
+  tb.innerHTML = payments.map(function(p, i) {
+    return '<tr>' +
+      '<td style="color:var(--muted);font-size:11px">' + (i+1) + '</td>' +
+      '<td class="cname">' + p.customer_name + '</td>' +
+      '<td class="camount">Rs ' + p.amount.toLocaleString() + '</td>' +
+      '<td style="color:var(--muted2)">' + (MN[p.month] || p.month) + '</td>' +
+      '<td style="color:var(--muted2);font-size:11px">' + p.date + '</td>' +
+      '<td><span class="badge b-' + p.status + '">' + p.status + '</span></td>' +
+      '<td><button class="del-btn" onclick="delPayment(\'' + p.id + '\')">Remove</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER DROPDOWN
+// ═══════════════════════════════════════════════
+function renderDropdown() {
+  var sel = document.getElementById('payCustomer');
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— Choose Customer —</option>';
+  customers.forEach(function(c) {
+    var o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.name + (c.area ? ' · ' + c.area : '');
+    sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER STATS
+// ═══════════════════════════════════════════════
+function renderStats() {
+  var now  = new Date();
+  var tm   = now.getMonth() + 1;
+  var ty   = now.getFullYear();
+  var paid = payments.filter(function(p) { return p.status === 'paid'; });
+
+  document.getElementById('stCust').textContent      = customers.length;
+  document.getElementById('stCollected').textContent = 'Rs ' + paid.reduce(function(s,p){ return s + p.amount; }, 0).toLocaleString();
+  document.getElementById('stPending').textContent   = 'Rs ' + payments.filter(function(p){ return p.status !== 'paid'; }).reduce(function(s,p){ return s + p.amount; }, 0).toLocaleString();
+  document.getElementById('stMonth').textContent     = 'Rs ' + paid.filter(function(p){ return p.month === tm && p.year === ty; }).reduce(function(s,p){ return s + p.amount; }, 0).toLocaleString();
+}
+
+// ═══════════════════════════════════════════════
+//  CHART
+// ═══════════════════════════════════════════════
+var chartInst  = null;
+var activeYear = new Date().getFullYear();
+
+function getYears() {
+  var s = {};
+  payments.forEach(function(p){ s[p.year] = true; });
+  s[new Date().getFullYear()] = true;
+  return Object.keys(s).map(Number).sort(function(a,b){ return b - a; });
+}
+
+function renderYearPills() {
+  var c = document.getElementById('yrPills');
+  c.innerHTML = getYears().map(function(y) {
+    return '<button class="yr-pill' + (y === activeYear ? ' active' : '') + '" onclick="setYear(' + y + ')">' + y + '</button>';
+  }).join('');
+}
+
+function setYear(y) { activeYear = y; renderYearPills(); buildChart(); }
+
+function buildChart() {
+  var labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var col  = Array(12).fill(0);
+  var pend = Array(12).fill(0);
+
+  payments.filter(function(p){ return p.year === activeYear; }).forEach(function(p) {
+    var idx = p.month - 1;
+    if (idx >= 0 && idx < 12) {
+      if (p.status === 'paid') col[idx]  += p.amount;
+      else                     pend[idx] += p.amount;
+    }
+  });
+
+  var ctx = document.getElementById('payChart').getContext('2d');
+  if (chartInst) chartInst.destroy();
+
+  chartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Collected', data: col,
+          backgroundColor: function(c) {
+            var g = c.chart.ctx.createLinearGradient(0,0,0,300);
+            g.addColorStop(0,'rgba(0,229,160,.85)'); g.addColorStop(1,'rgba(0,229,160,.2)'); return g;
+          },
+          borderColor: 'rgba(0,229,160,.8)', borderWidth: 1, borderRadius: 8, borderSkipped: false
+        },
+        {
+          label: 'Pending', data: pend,
+          backgroundColor: function(c) {
+            var g = c.chart.ctx.createLinearGradient(0,0,0,300);
+            g.addColorStop(0,'rgba(255,209,102,.7)'); g.addColorStop(1,'rgba(255,209,102,.15)'); return g;
+          },
+          borderColor: 'rgba(255,209,102,.7)', borderWidth: 1, borderRadius: 8, borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color:'#8895b3', font:{family:'DM Sans',size:12,weight:'600'}, boxWidth:12, boxHeight:12, borderRadius:4, usePointStyle:true, pointStyle:'rectRounded' } },
+        tooltip: {
+          backgroundColor:'rgba(12,15,29,.95)', borderColor:'rgba(0,255,231,.2)', borderWidth:1,
+          titleColor:'#f0f4ff', bodyColor:'#8895b3', padding:12, cornerRadius:12,
+          titleFont:{family:'Syne',size:13,weight:'700'}, bodyFont:{family:'DM Sans',size:12},
+          callbacks:{ label: function(c){ return '  Rs ' + c.parsed.y.toLocaleString(); } }
+        }
+      },
+      scales: {
+        x: { ticks:{color:'#5a6585',font:{family:'DM Sans',size:11,weight:'500'}}, grid:{color:'rgba(255,255,255,.04)'}, border:{color:'rgba(255,255,255,.06)'} },
+        y: { ticks:{color:'#5a6585',font:{family:'DM Sans',size:11},callback:function(v){ return 'Rs ' + v.toLocaleString(); }}, grid:{color:'rgba(255,255,255,.04)'}, border:{color:'rgba(255,255,255,.06)'} }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════
+function renderAll() {
+  renderCustTable();
+  renderPayTable();
+  renderDropdown();
+  renderStats();
+  renderYearPills();
+  buildChart();
+}
+
+// ═══════════════════════════════════════════════
+//  BUTTON EVENTS
+// ═══════════════════════════════════════════════
+document.getElementById('addCustBtn').addEventListener('click', addCustomer);
+document.getElementById('addPayBtn').addEventListener('click', addPayment);
+
+// ═══════════════════════════════════════════════
+//  AUTO REFRESH EVERY 30 SECONDS
+// ═══════════════════════════════════════════════
+setInterval(fetchAll, 30000);
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+fetchAll();
+</script>
+</body>
+</html>
